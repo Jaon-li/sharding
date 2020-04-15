@@ -1,0 +1,80 @@
+server:
+  port: 8901
+
+#spring:
+#  datasource:
+#    url: jdbc:mysql://cdb-iaws5uss.bj.tencentcdb.com:10007/sharding?useUnicode=true&characterEncoding=UTF-8&allowMultiQueries=true&useSSL=false&serverTimezone=GMT
+#    username: wesley
+#    password: jaon2020
+sharding:
+  jdbc:
+    datasource:
+      names: ds-master-0,ds-master-1,ds-master-0-slave-0,ds-master-0-slave-1,ds-master-1-slave-0,ds-master-1-slave-1
+
+      ds-master-0:
+        type: com.alibaba.druid.pool.DruidDataSource
+        driver-class-name: com.mysql.jdbc.Driver
+        url: jdbc:mysql://cdb-iaws5uss.bj.tencentcdb.com:10007/sharding?useUnicode=true&characterEncoding=UTF-8&allowMultiQueries=true&useSSL=false&serverTimezone=GMT
+        username: wesley
+        password: jaon2020
+
+      ds-master-0-slave-0:
+        type: com.alibaba.druid.pool.DruidDataSource
+        driver-class-name: com.mysql.jdbc.Driver
+        url: jdbc:mysql://cdb-iaws5uss.bj.tencentcdb.com:10007/sharding?useUnicode=true&characterEncoding=UTF-8&allowMultiQueries=true&useSSL=false&serverTimezone=GMT
+        username: wesley
+        password: jaon2020
+
+      ds-master-0-slave-1:
+        type: com.alibaba.druid.pool.DruidDataSource
+        driver-class-name: com.mysql.jdbc.Driver
+        url: jdbc:mysql://cdb-iaws5uss.bj.tencentcdb.com:10007/sharding?useUnicode=true&characterEncoding=UTF-8&allowMultiQueries=true&useSSL=false&serverTimezone=GMT
+        username: wesley
+        password: jaon2020
+
+      ds-master-1:
+        type: com.alibaba.druid.pool.DruidDataSource
+        driver-class-name: com.mysql.jdbc.Driver
+        url: jdbc:mysql://cdb-iaws5uss.bj.tencentcdb.com:10007/sharding1?useUnicode=true&characterEncoding=UTF-8&allowMultiQueries=true&useSSL=false&serverTimezone=GMT
+        username: wesley
+        password: jaon2020
+
+      ds-master-1-slave-0:
+        type: com.alibaba.druid.pool.DruidDataSource
+        driver-class-name: com.mysql.jdbc.Driver
+        url: jdbc:mysql://cdb-iaws5uss.bj.tencentcdb.com:10007/sharding1?useUnicode=true&characterEncoding=UTF-8&allowMultiQueries=true&useSSL=false&serverTimezone=GMT
+        username: wesley
+        password: jaon2020
+
+        ds-master-1-slave-1:
+          type: com.alibaba.druid.pool.DruidDataSource
+          driver-class-name: com.mysql.jdbc.Driver
+          url: jdbc:mysql://cdb-iaws5uss.bj.tencentcdb.com:10007/sharding1?useUnicode=true&characterEncoding=UTF-8&allowMultiQueries=true&useSSL=false&serverTimezone=GMT
+          username: wesley
+          password: jaon2020
+
+
+    config:
+      sharding:
+        default-database-strategy:
+          inline:
+            sharding-column: id
+            algorithm-expression: ds_$->{id % 2}
+
+        tables:
+          user:
+            actual-data-nodes: ds_$->{0..1}.user_$->{0..4}
+            table-strategy:
+              inline:
+                sharding-column: id
+                algorithm-expression: user_$->{id % 5}
+            key-generator-column-name: id
+
+
+        master-slave-rules:
+          ds_0:
+            master-data-source-name: ds-master-0
+            slave-data-source-names: ds-master-0-slave-0, ds-master-0-slave-1
+          ds_1:
+            master-data-source-name: ds-master-1
+            slave-data-source-names: ds-master-1-slave-0, ds-master-1-slave-1
